@@ -71,15 +71,15 @@ Player.prototype = {
         };
 
         this.music.onplaying = function () {
-            timer = setInterval(function () {
+            that.timer = setInterval(function () {
                 that.updateProgress();
             }, 1000);
         };
         this.music.onpause = function () {
-            clearInterval(timer)
+            clearInterval(that.timer)
         };
         this.music.addEventListener('ended', function () {
-            clearInterval(timer)
+            clearInterval(that.timer)
         });
 
         this.forwardBtn.onclick = function () {
