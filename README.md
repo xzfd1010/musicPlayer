@@ -37,7 +37,7 @@ player.loadLastMusic();//播放上一首
 ## Demo
 ![](http://jscode.me/uploads/default/original/2X/e/e7811a56143f6d0be5ffe9b8b5d489e1a6aa2524.png)
 
-**[效果预览](http://js.jirengu.com/dudi)**
+**[效果预览](https://xzfd1010.github.io/musicPlayer/test.html)**
 
 ## 参考资料
 - [MDN-HTMLMediaElement](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLMediaElement)
