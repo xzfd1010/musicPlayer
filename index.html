@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>音乐播放器-实现功能版</title>
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/audioPlayer.css">
+</head>
+
+<body>
+<div class="musicbox">
+    <div class="music">
+        <!--播放控制-->
+        <div class="control">
+            <span class="back"><i class="fa fa-step-backward"></i></span>
+            <span class="play"><i class="fa fa-pause"></i></span>
+            <span class="forward"><i class="fa fa-step-forward"></i></span>
+        </div>
+        <!--信息-->
+        <div class="info">
+            <div class="title">My song</div>
+            <div class="author">ruoyu</div>
+        </div>
+    </div>
+
+    <!--进度条-->
+    <div class="progress">
+        <div class="bar">
+            <!--全部进度-->
+            <div class="progress-total"></div>
+            <!--当前进度-->
+            <div class="progress-now"></div>
+        </div>
+
+        <!--时间-->
+        <div class="time">0:00</div>
+    </div>
+
+</div>
+
+<script>
+    // 音乐列表数组
+    let musicList=[];
+    // 面向对象的改写方式
+    /*
+     function Player(ct, musicList){
+     // 当前的位置
+     this.ct = ct
+     this.musicList = musicList
+     this.init()
+     this.bind()
+     this.start()
+     }
+
+     Player.prototype = {
+     init: function(){
+        //
+        this.backBtn = this.ct.querySelector('.back')
+     },
+     // 绑定事件
+     bind: function(){
+
+     },
+     start: function(){
+        this.music.play();
+     }
+     }
+     let musicBox = document.querySelector('.musicbox');
+     new Player(musicBox,musicList)
+     */
+
+    // 所有的按钮
+    let backBtn = document.querySelector('.musicbox .back');
+    let playBtn = document.querySelector('.musicbox .play');
+    let forwardBtn = document.querySelector('.musicbox .forward');
+    let titleNode = document.querySelector('.musicbox .title');
+    let authorNode = document.querySelector('.musicbox .author');
+    let timeNode = document.querySelector('.musicbox .time');
+    let progressBarNode = document.querySelector('.musicbox .progress .bar');
+    let progressNowNode = document.querySelector('.musicbox .progress-now');
+    let timer;
+
+    let music = new Audio();
+    // 自动播放，点击下一曲时也会自动播放
+    music.autoplay = true;
+    // 音乐的索引
+    let musicIndex = 0;
+
+    // 异步获取所有音乐列表，获取后
+    getMusic(function (data) {
+        musicList = data;
+        // 加载第index首音乐
+        loadMusic(musicList[musicIndex])
+    });
+
+
+    playBtn.onclick = function () {
+        let icon = this.querySelector('.fa');
+        if (icon.classList.contains('fa-play')) {
+            music.play();
+        } else {
+            music.pause();
+        }
+        icon.classList.toggle('fa-play');
+        icon.classList.toggle('fa-pause');
+    };
+
+    // 绑定事件的方法
+    forwardBtn.onclick = loadNextMusic;
+    backBtn.onclick = loadLastMusic;
+    music.onended = loadNextMusic;
+    music.shouldUpdate = true;
+
+
+    music.onplaying = function () {
+        timer = setInterval(function () {
+            // 更新progress，每隔1s更新一次
+            updateProgress();
+        }, 1000);
+//        console.log('play')
+    };
+    music.onpause = function () {
+//        console.log('pause');
+        // 清除计时器
+        clearInterval(timer)
+    };
+    // 二级事件
+    music.addEventListener('ended', function () {
+        // 清除计时器
+        clearInterval(timer)
+    });
+    /*
+     music.ontimeupdate = function(){
+     let _this = this
+     if(_this.shouldUpdate) {
+     updateProgress()
+     _this.shouldUpdate = false
+     setTimeout(function(){
+     _this.shouldUpdate = true
+     }, 1000)
+     }
+     }
+     */
+
+
+    progressBarNode.onclick = function (e) {
+        let percent = e.offsetX / parseInt(getComputedStyle(this).width);
+        music.currentTime = percent * music.duration;
+        progressNowNode.style.width = percent * 100 + "%";
+    };
+
+    // 播放某一首音乐
+    function loadMusic(songObj) {
+        // 切换audio的src
+        music.src = songObj.src;
+        // 更换内容
+        titleNode.innerText = songObj.title;
+        authorNode.innerText = songObj.author;
+    }
+
+    // 播放下一首的操作
+    function loadNextMusic() {
+        musicIndex++;
+        // 如果超出列表长度，用取余进行运算
+        musicIndex = musicIndex % musicList.length;
+        loadMusic(musicList[musicIndex]);
+    }
+
+    // 播放上一首
+    function loadLastMusic() {
+        musicIndex--;
+        // 这里处理-1的情况
+        musicIndex = (musicIndex + musicList.length) % musicList.length;
+        loadMusic(musicList[musicIndex]);
+    }
+
+    // 更新进度条
+    function updateProgress() {
+        // 获取当前播放比例
+        let percent = (music.currentTime / music.duration) * 100 + '%';
+        // 设置宽度
+        progressNowNode.style.width = percent;
+
+        // 分钟数
+        let minutes = parseInt(music.currentTime / 60);
+        // 秒数
+        let seconds = parseInt(music.currentTime % 60) + '';
+        // 补全位数
+        seconds = seconds.length === 2 ? seconds : '0' + seconds;
+        // 时间节点
+        timeNode.innerText = minutes + ':' + seconds;
+    }
+
+    // 获取服务器列表的音乐
+    function getMusic(callback) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('get', 'music.json', true);
+        xhr.send();
+        xhr.onload = function () {
+            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                callback(JSON.parse(xhr.responseText));
+            }
+        };
+    }
+</script>
+</body>
+</html>

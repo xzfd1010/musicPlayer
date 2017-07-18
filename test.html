@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/audioPlayer.css">
+    <title>test</title>
+</head>
+<body>
+<div class="musicbox"></div>
+<script src="js/audioPlayer.js"></script>
+<script>
+
+    let musicList = [{
+        "src": "mp3/天后.mp3",
+        "title": "天后",
+        "author": "陈势安"
+    }, {
+        "src": "mp3/浮夸.mp3",
+        "title": "浮夸",
+        "author": "陈奕迅"
+    }];
+
+    let player;
+
+    // 获取服务器列表的音乐
+    function getMusic(callback) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('get', 'music.json', true);
+        xhr.send();
+        xhr.onload = function () {
+            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                callback(JSON.parse(xhr.responseText));
+            }
+        };
+    }
+
+    //     异步获取所有音乐列表，获取后
+    getMusic(function (data) {
+        musicList = data;
+        let musicbox = document.querySelector('.musicbox');
+        player = new Player(musicbox, musicList);
+    });
+
+
+</script>
+</body>
+</html>
